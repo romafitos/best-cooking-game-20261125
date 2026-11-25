@@ -4,6 +4,7 @@ export const ACTION_CONFIRM = 'confirm';
 export const ACTION_PAUSE = 'pause';
 export const ACTION_MUTE = 'mute';
 export const ACTION_START = 'start';
+export const ACTION_SWAP = 'swap'; // tray unlock: swap front and back item
 
 const KEYMAP = {
   ArrowUp: 'up', KeyW: 'up',
@@ -13,6 +14,7 @@ const KEYMAP = {
   KeyE: ACTION_CONFIRM, Space: ACTION_CONFIRM, Enter: ACTION_START,
   KeyP: ACTION_PAUSE, Escape: ACTION_PAUSE,
   KeyM: ACTION_MUTE,
+  KeyQ: ACTION_SWAP, Tab: ACTION_SWAP,
 };
 
 export function createInput(canvas) {

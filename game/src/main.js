@@ -6,9 +6,9 @@
 // ?seed=N fixes the ticket order. ?shot=start|cover|rush|serve (with
 // &seed=N) stages that scene instead of running the loop, paints it twice
 // and sets window.__shotReady for a screenshot.
-import { BEST_KEY, STEP } from './config.js';
+import { BEST_KEY, SLOWMO_SCALE, STEP } from './config.js';
 import { createRandom } from './random.js';
-import { createWorld, stepWorld, EVENT_CHOP, EVENT_PICKUP, EVENT_PLACE, EVENT_SIZZLE, EVENT_DING, EVENT_SERVE, EVENT_MISS, EVENT_BURN, EVENT_RUSH, EVENT_TRASH, EVENT_DENY, SCREEN_TITLE, SCREEN_PLAY, SCREEN_PAUSED, SCREEN_OVER } from './world.js';
+import { createWorld, stepWorld, EVENT_CHOP, EVENT_PICKUP, EVENT_PLACE, EVENT_SIZZLE, EVENT_DING, EVENT_SERVE, EVENT_MISS, EVENT_BURN, EVENT_RUSH, EVENT_TRASH, EVENT_DENY, EVENT_UNLOCK, EVENT_SWAP, SCREEN_TITLE, SCREEN_PLAY, SCREEN_PAUSED, SCREEN_OVER } from './world.js';
 import { ACTION_CONFIRM, ACTION_MUTE, ACTION_PAUSE, ACTION_START, createInput } from './input.js';
 import { createAudio } from './audio.js';
 import { createRenderer } from './render.js';
@@ -59,6 +59,8 @@ function playEvents(events) {
     else if (event === EVENT_RUSH) audio.rush();
     else if (event === EVENT_TRASH) audio.trash();
     else if (event === EVENT_DENY) audio.deny();
+    else if (event === EVENT_UNLOCK) audio.unlock();
+    else if (event === EVENT_SWAP) audio.swap();
   }
 }
 
@@ -105,7 +107,9 @@ if (shot) {
       world.screen = world.screen === SCREEN_PLAY ? SCREEN_PAUSED : SCREEN_PLAY;
     }
     if (world.screen === SCREEN_PLAY) {
-      acc += dt;
+      // A serve slows the whole kitchen for a beat (slow-mo), so the
+      // world gets fewer fixed steps per real second while it lasts.
+      acc += world.slowmo > 0 ? dt * SLOWMO_SCALE : dt;
       let firstStep = true;
       while (acc >= STEP) {
         const events = stepWorld(world, {

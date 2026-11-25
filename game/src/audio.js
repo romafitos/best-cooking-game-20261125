@@ -47,5 +47,12 @@ export function createAudio() {
     rush() { blip(440, 0.15, 'square', 0.1, 660); setTimeout(() => blip(660, 0.15, 'square', 0.1, 880), 140); },
     deny() { blip(140, 0.1, 'square', 0.08, 100); },
     trash() { blip(300, 0.12, 'triangle', 0.1, 150); },
+    // A rising three-note fanfare when the stall earns an upgrade.
+    unlock() {
+      blip(523, 0.14, 'triangle', 0.12, 523);
+      setTimeout(() => blip(659, 0.14, 'triangle', 0.12, 659), 120);
+      setTimeout(() => blip(784, 0.3, 'triangle', 0.14, 1046), 240);
+    },
+    swap() { blip(420, 0.06, 'sine', 0.08, 520); },
   };
 }

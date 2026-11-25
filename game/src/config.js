@@ -23,7 +23,9 @@ export const PALETTE = {
 export const DAY_SECONDS = 180;
 export const STEP = 1 / 60;
 export const CHEF_SPEED = 260; // px per second
-export const HAND_LIMIT = 1;
+// Without the tray the chef carries one thing in hand; the tray unlock
+// adds one more slot behind it (Q swaps which of the two is in front).
+export const TRAY_SLOTS = 1;
 
 // An ingredient's journey: raw -> chopped (board) -> wokked (wok), or
 // raw -> steamed (steamer), or raw -> wokked (noodle, egg). `chop`, `wok`
@@ -104,6 +106,27 @@ export const WAVES = [
   { from: 120, spawn: 7, patience: 35, label: 'DINNER RUSH' },
 ];
 export const MAX_OPEN_TICKETS = 4;
-export const PLATE_SLOTS = 2;
+export const PLATE_SLOTS = 3; // plates drawn on the pass
+export const START_PLATES = 2; // plates usable before the third-plate unlock
+
+// Stall upgrades: bought by the coins earned during the day, not by the
+// clock, so a cook who serves well gets a bigger kitchen before the waves.
+export const UPGRADES = [
+  { id: 'third-plate', at: 50, name: 'THIRD PLATE', note: 'a third plate on the pass' },
+  { id: 'tray', at: 100, name: 'TWO-HAND TRAY', note: 'carry two things, Q swaps' },
+  { id: 'hot-wok', at: 160, name: 'HOT WOK', note: 'the wok cooks in 3 s' },
+];
+export const HOT_WOK_SECONDS = 3;
+
+// Game feel: how hard and how long each hit shakes the frame, and how long
+// a serve slows the kitchen (world seconds, played at SLOWMO_SCALE speed).
+export const SHAKE = {
+  serve: { power: 5, time: 0.25 },
+  miss: { power: 9, time: 0.35 },
+  burn: { power: 12, time: 0.45 },
+  unlock: { power: 6, time: 0.3 },
+};
+export const SLOWMO_SECONDS = 0.22;
+export const SLOWMO_SCALE = 0.35;
 
 export const BEST_KEY = 'wok-and-ember-best';

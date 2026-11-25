@@ -86,6 +86,23 @@ function cookDish(state, recipeId, seconds) {
   runPilot(state, goals, seconds);
 }
 
+// The open ticket with the most patience left: the one the pilot can
+// still finish before it walks out.
+function longestWaitingTicket(state) {
+  let best = null;
+  for (const ticket of state.tickets) if (!best || ticket.patience > best.patience) best = ticket;
+  return best;
+}
+
+// Cook the dish for a ticket and serve it; with no ticket yet, wait for one.
+function serveNextTicket(state) {
+  if (state.tickets.length === 0) runPilot(state, [{ at: { x: state.chef.x, y: state.chef.y }, do: 'wait', n: 8 }], 8);
+  const ticket = longestWaitingTicket(state);
+  if (!ticket) return;
+  cookDish(state, ticket.recipe.id, 60);
+  runPilot(state, [{ at: spot(STATIONS.pass), do: 'confirm', needTaps: 2 }], 6);
+}
+
 export function stageShot(state, shot) {
   state.screen = 'play';
   if (shot === 'start') {
@@ -93,42 +110,55 @@ export function stageShot(state, shot) {
     return;
   }
   if (shot === 'cover') {
-    // A busy mid-day frame: two dishes plated, the wok firing, tickets open.
-    cookDish(state, 'ember-noodles', 55);
-    cookDish(state, 'garden-stirfry', 40);
-    // Leave the wok cooking and a ticket or two open for the frame.
+    // A busy mid-day frame: two dishes served (coins in, the third plate
+    // unlocked), one dish READY on the pass, one plate half built, the wok
+    // firing and a chicken mid-chop on the board.
+    serveNextTicket(state);
+    serveNextTicket(state);
+    const ready = longestWaitingTicket(state);
+    if (ready) cookDish(state, ready.recipe.id, 60);
     const goals = [
+      { at: crateSpot('pepper'), do: 'confirm' },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 3 },
+      { at: spot(STATIONS.board), do: 'confirm' },
+      { at: spot(STATIONS.pass), do: 'confirm' },
       { at: crateSpot('noodle'), do: 'confirm' },
       { at: spot(STATIONS.wok), do: 'confirm' },
       { at: crateSpot('chicken'), do: 'confirm' },
       { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
-      { at: spot(STATIONS.board), do: 'confirm', needTaps: 3 },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 2 },
     ];
-    runPilot(state, goals, 20);
+    runPilot(state, goals, 30);
     return;
   }
   if (shot === 'rush') {
-    // Dinner rush: several tickets, a combo running, steam everywhere.
-    cookDish(state, 'beef-egg-noodles', 60);
-    cookDish(state, 'prawn-omelette', 45);
-    state.time = 125;
-    state.waveIndex = 2;
+    // Dinner rush with the stall upgraded: dishes served until the tray
+    // unlocks (its banner still up), the chef carrying two things at once.
+    serveNextTicket(state);
+    serveNextTicket(state);
+    serveNextTicket(state);
+    serveNextTicket(state);
     const goals = [
       { at: crateSpot('prawn'), do: 'confirm' },
-      { at: spot(STATIONS.steamer), do: 'confirm' },
+      { at: crateSpot('egg'), do: 'confirm' },
+      { at: { x: 560, y: 430 }, do: 'walk' },
     ];
-    runPilot(state, goals, 12);
-    // Banner last, so the frame still shows it (it decays in stepWorld).
+    runPilot(state, goals, 8.5);
     state.rushLabel = 'DINNER RUSH';
     state.rushBanner = 2.4;
     return;
   }
   if (shot === 'serve') {
     // The serve moment: pick up the finished dish, then serve it — the
-    // frame catches the +coins popup over the pass.
-    cookDish(state, 'golden-dumplings', 55);
+    // frame catches the gold ring, the slow-mo vignette and the coins.
+    const ticket = longestWaitingTicket(state);
+    cookDish(state, ticket ? ticket.recipe.id : 'golden-dumplings', 60);
     const goals = [{ at: spot(STATIONS.pass), do: 'confirm', needTaps: 2 }];
     runPilot(state, goals, 8);
+    // Advance a few steps so the ring has grown out of the pass, while
+    // the slow-mo is still on.
+    runPilot(state, [{ at: { x: state.chef.x, y: state.chef.y }, do: 'wait', n: 0.1 }], 0.1);
     return;
   }
   // Unknown shot: just open the stall.
