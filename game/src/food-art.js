@@ -182,7 +182,8 @@ export function drawPlate(ctx, x, y, r, items, ready) {
   ctx.fill();
   items.forEach((component, i) => {
     const angle = -Math.PI / 2 + (i / Math.max(1, items.length)) * Math.PI * 2;
-    drawIngredient(ctx, component.ing, component.stage, x + Math.cos(angle) * r * 0.4, y + Math.sin(angle) * r * 0.4, r * 0.32);
+    const spread = items.length > 1 ? r * 0.38 : 0;
+    drawIngredient(ctx, component.ing, component.stage, x + Math.cos(angle) * spread, y + Math.sin(angle) * spread, items.length > 1 ? r * 0.4 : r * 0.52);
   });
 }
 

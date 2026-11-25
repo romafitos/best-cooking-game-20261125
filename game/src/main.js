@@ -83,7 +83,7 @@ if (shot) {
   // status line is hidden so the 1280x720 canvas fills the frame exactly.
   document.getElementById('status').style.display = 'none';
   document.body.style.justifyContent = 'flex-start';
-  stageShot(world, shot);
+  stageShot(world, shot, () => createWorld(createRandom(seed)));
   renderer.draw(world, best);
   renderer.draw(world, best);
   window.__shotReady = true;

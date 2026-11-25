@@ -61,6 +61,128 @@ function makeFloorLayer() {
   return layer;
 }
 
+// The stall's crest woven into the rug: a big steaming bowl of ember
+// noodles with chopsticks, flanked by two flames and the house name — the
+// dish the stall is known for, large enough to read on a thumbnail.
+function drawFlameMotif(ctx, x, y, s) {
+  ctx.fillStyle = '#e4572e';
+  ctx.beginPath();
+  ctx.moveTo(x, y - 30 * s);
+  ctx.quadraticCurveTo(x + 20 * s, y - 6 * s, x + 12 * s, y + 10 * s);
+  ctx.quadraticCurveTo(x, y + 18 * s, x - 12 * s, y + 10 * s);
+  ctx.quadraticCurveTo(x - 20 * s, y - 6 * s, x, y - 30 * s);
+  ctx.fill();
+  ctx.fillStyle = '#ffd166';
+  ctx.beginPath();
+  ctx.moveTo(x, y - 12 * s);
+  ctx.quadraticCurveTo(x + 9 * s, y + 2 * s, x + 5 * s, y + 9 * s);
+  ctx.quadraticCurveTo(x, y + 13 * s, x - 5 * s, y + 9 * s);
+  ctx.quadraticCurveTo(x - 9 * s, y + 2 * s, x, y - 12 * s);
+  ctx.fill();
+}
+
+function drawRugMotif(ctx, cx, cy) {
+  // Steam curls rising off the bowl.
+  ctx.strokeStyle = 'rgba(255,243,214,0.55)';
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  for (const dx of [-26, 0, 26]) {
+    ctx.beginPath();
+    ctx.moveTo(cx + dx, cy - 14);
+    ctx.bezierCurveTo(cx + dx - 10, cy - 24, cx + dx + 10, cy - 32, cx + dx, cy - 44);
+    ctx.stroke();
+  }
+  // Bowl body and rim.
+  ctx.fillStyle = '#241a12';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 4, 62, 30, 0, 0, Math.PI);
+  ctx.fill();
+  ctx.fillStyle = '#c0392b';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 2, 58, 26, 0, 0, Math.PI);
+  ctx.fill();
+  ctx.strokeStyle = '#ffd166';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 6, 46, 16, 0, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.stroke();
+  ctx.fillStyle = '#fff3d6';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 62, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Broth, noodles, an egg half and greens on top.
+  ctx.fillStyle = '#d98c3a';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 54, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#f2c14e';
+  ctx.lineWidth = 3;
+  for (let i = 0; i < 4; i += 1) {
+    ctx.beginPath();
+    ctx.ellipse(cx - 16 + i * 9, cy, 16, 4, 0, Math.PI, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#fff8e7';
+  ctx.beginPath();
+  ctx.ellipse(cx + 28, cy - 2, 10, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f5a623';
+  ctx.beginPath();
+  ctx.arc(cx + 28, cy - 2, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#5a8a3c';
+  ctx.beginPath();
+  ctx.ellipse(cx - 32, cy - 2, 9, 4, -0.4, 0, Math.PI * 2);
+  ctx.ellipse(cx - 22, cy - 4, 8, 3.5, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  // Chopsticks resting across the rim.
+  ctx.strokeStyle = '#8a5530';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx + 14, cy - 4);
+  ctx.lineTo(cx + 78, cy - 34);
+  ctx.moveTo(cx + 20, cy - 2);
+  ctx.lineTo(cx + 86, cy - 26);
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+  drawFlameMotif(ctx, cx - 116, cy + 6, 0.9);
+  drawFlameMotif(ctx, cx + 116, cy + 6, 0.9);
+  text(ctx, 'HOUSE EMBER NOODLES', cx, cy - 56, 12, '#ffd166', 900, 'center');
+}
+
+// Tonight's menu: a chalkboard on an easel by the pass, listing every dish
+// the stall cooks with its price and components, so the floor by the pass
+// reads as part of the stall instead of empty tiles.
+function drawMenuBoard(ctx) {
+  const x = 968;
+  const y = 432;
+  const w = 196;
+  const h = 168;
+  ctx.strokeStyle = '#6b3f22';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(x + 30, y + h);
+  ctx.lineTo(x + 18, y + h + 34);
+  ctx.moveTo(x + w - 30, y + h);
+  ctx.lineTo(x + w - 18, y + h + 34);
+  ctx.stroke();
+  ctx.fillStyle = '#8a5530';
+  roundRect(ctx, x - 6, y - 6, w + 12, h + 12, 10);
+  ctx.fill();
+  ctx.fillStyle = '#22302b';
+  roundRect(ctx, x, y, w, h, 6);
+  ctx.fill();
+  text(ctx, "TONIGHT'S MENU", x + w / 2, y + 16, 13, '#ffd166', 900, 'center');
+  RECIPES.slice(0, 5).forEach((recipe, i) => {
+    const ry = y + 40 + i * 26;
+    text(ctx, recipe.name, x + 10, ry, 11, 'rgba(255,243,214,0.92)', 700);
+    text(ctx, `$${recipe.price}`, x + w - 10, ry, 11, '#ffd166', 800, 'right');
+    recipe.needs.forEach((need, k) => {
+      drawIngredient(ctx, need.ing, need.stage, x + 16 + k * 18, ry + 12, 6);
+    });
+  });
+}
+
 function drawBackdrop(ctx, floorLayer) {
   if (floorLayer) ctx.drawImage(floorLayer, -20, 76);
   else paintFloor(ctx, -20, 76, CANVAS.width + 40, CANVAS.height);
@@ -86,6 +208,8 @@ function drawBackdrop(ctx, floorLayer) {
   ctx.beginPath();
   ctx.ellipse(640, 560, 150, 44, 0, 0, Math.PI * 2);
   ctx.fill();
+  drawRugMotif(ctx, 640, 548);
+  drawMenuBoard(ctx);
   for (const px of [240, 1080]) {
     ctx.fillStyle = '#b0703a';
     roundRect(ctx, px - 16, 636, 32, 40, 6);
@@ -115,7 +239,7 @@ function drawCrates(ctx) {
     ctx.strokeStyle = PALETTE.woodDark;
     ctx.lineWidth = 2;
     ctx.stroke();
-    drawIngredient(ctx, crate.ing, 'raw', crate.x + crate.w / 2, crate.y + 24, 16);
+    drawIngredient(ctx, crate.ing, 'raw', crate.x + crate.w / 2, crate.y + 23, 19);
     text(ctx, def.name.toUpperCase(), crate.x + crate.w / 2, crate.y + crate.h - 10, 10, PALETTE.cream, 800, 'center');
   }
 }
@@ -132,7 +256,7 @@ function drawBoard(ctx, state) {
   roundRect(ctx, b.x + 18, b.y + 30, b.w - 36, 62, 6);
   ctx.fill();
   if (state.board) {
-    drawIngredient(ctx, state.board.item.ing, state.board.item.stage, b.x + b.w / 2, b.y + 61, 22);
+    drawIngredient(ctx, state.board.item.ing, state.board.item.stage, b.x + b.w / 2, b.y + 61, 30);
     for (let i = 0; i < 3; i += 1) {
       ctx.fillStyle = i < state.board.taps ? '#e4572e' : 'rgba(36,26,18,0.3)';
       ctx.beginPath();
@@ -175,7 +299,7 @@ function drawWok(ctx, state) {
   ctx.arc(w.x + w.w / 2, w.y + 58, 34, 0, Math.PI * 2);
   ctx.fill();
   if (state.wok) {
-    drawIngredient(ctx, state.wok.item.ing, state.wok.item.stage, w.x + w.w / 2, w.y + 58, 22);
+    drawIngredient(ctx, state.wok.item.ing, state.wok.item.stage, w.x + w.w / 2, w.y + 58, 30);
     const frac = Math.min(1, state.wok.t / state.wokSeconds);
     const color = state.wok.item.stage === 'burnt' ? '#241a12' : '#f5a623';
     progressBar(ctx, w.x + 16, w.y + w.h - 22, w.w - 32, 8, frac, color);
@@ -204,7 +328,7 @@ function drawSteamer(ctx, state) {
     ctx.fillRect(s.x + 34 + i * 36, s.y + 48, 20, 4);
   }
   if (state.steamer) {
-    drawIngredient(ctx, state.steamer.item.ing, state.steamer.item.stage, s.x + s.w / 2, s.y + 48, 18);
+    drawIngredient(ctx, state.steamer.item.ing, state.steamer.item.stage, s.x + s.w / 2, s.y + 48, 27);
     progressBar(ctx, s.x + 16, s.y + s.h - 22, s.w - 32, 8, Math.min(1, state.steamer.t / STEAM_SECONDS), '#7fb069');
   }
   text(ctx, s.label, s.x + s.w / 2, s.y - 12, 11, PALETTE.cream, 800, 'center');
@@ -224,11 +348,11 @@ function drawPass(ctx, state) {
   state.plates.forEach((plate, i) => {
     const px = p.x + 58 + i * 108;
     const py = p.y + 64;
-    if (i >= state.plateSlots) { drawLockedPlate(ctx, px, py, 42, platePrice); return; }
+    if (i >= state.plateSlots) { drawLockedPlate(ctx, px, py, 47, platePrice); return; }
     const recipe = plateRecipe(plate);
-    drawPlate(ctx, px, py, 42, plate.items, !!recipe);
-    if (recipe) text(ctx, 'READY', px, p.y + 122, 13, '#7fb069', 900, 'center');
-    else if (plate.items.length > 0) text(ctx, `${plate.items.length}/3`, px, p.y + 122, 12, PALETTE.cream, 800, 'center');
+    drawPlate(ctx, px, py, 47, plate.items, !!recipe);
+    if (recipe) text(ctx, 'READY', px, p.y + 126, 13, '#7fb069', 900, 'center');
+    else if (plate.items.length > 0) text(ctx, `${plate.items.length}/3`, px, p.y + 126, 12, PALETTE.cream, 800, 'center');
   });
   ctx.fillStyle = '#e4572e';
   roundRect(ctx, p.x + p.w - 96, p.y + p.h - 32, 84, 24, 6);
@@ -321,8 +445,8 @@ function drawChef(ctx, state) {
   ctx.arc(look, -16, 4, 0.15 * Math.PI, 0.85 * Math.PI);
   ctx.stroke();
   // Front item above the toque; the tray item rides smaller beside it.
-  if (chef.tray) drawCarried(ctx, chef.tray, 26, -48, 8);
-  if (chef.hand) drawCarried(ctx, chef.hand, 0, -60, 12);
+  if (chef.tray) drawCarried(ctx, chef.tray, 28, -50, 11);
+  if (chef.hand) drawCarried(ctx, chef.hand, 0, -64, 16);
   ctx.restore();
 }
 

@@ -184,7 +184,7 @@ function streak(state, combo, notBefore) {
   }
 }
 
-export function stageShot(state, shot) {
+export function stageShot(state, shot, fresh) {
   state.screen = 'play';
   if (shot === 'start') {
     state.screen = 'title';
@@ -214,20 +214,46 @@ export function stageShot(state, shot) {
     return;
   }
   if (shot === 'rush') {
-    // Rush hour on a streak: dishes served back to back into the rush,
-    // the chef heading out with two things at once once the tray is open.
-    streak(state, 2, 100);
-    const goals = [
-      { at: crateSpot('prawn'), do: 'confirm' },
-      { at: crateSpot('egg'), do: 'confirm' },
-      { at: { x: 560, y: 430 }, do: 'walk' },
-    ];
-    runPilot(state, goals, 8.5);
-    // Hold on until the dinner rush rolls in, so its banner is up.
-    if (state.time < 120.4) {
-      const n = 120.4 - state.time;
-      runPilot(state, [{ at: { x: state.chef.x, y: state.chef.y }, do: 'wait', n }], n + STEP);
+    // The dinner rush at full pressure: a streak running into the rush, a
+    // plate already started, then pepper under the knife, prawns into the
+    // steamer and noodles hitting the wok — every station working at once
+    // as the DINNER RUSH banner drops. The pause before the last burst is
+    // searched (same seed, fresh day each try) so the frame lands while the
+    // banner is up and nothing has burnt.
+    const tryRush = (pause) => {
+      const s = fresh ? fresh() : state;
+      s.screen = 'play';
+      streak(s, 2, 62);
+      runPilot(s, [
+        { at: crateSpot('greens'), do: 'confirm' },
+        { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
+        { at: spot(STATIONS.board), do: 'confirm', needTaps: 3 },
+        { at: spot(STATIONS.board), do: 'confirm' },
+        { at: spot(STATIONS.pass), do: 'confirm' },
+      ], 30);
+      if (pause > 0) runPilot(s, [{ at: { x: s.chef.x, y: s.chef.y }, do: 'wait', n: pause }], pause + STEP);
+      runPilot(s, [
+        { at: crateSpot('pepper'), do: 'confirm' },
+        { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
+        { at: spot(STATIONS.board), do: 'confirm', needTaps: 2 },
+        { at: crateSpot('prawn'), do: 'confirm' },
+        { at: spot(STATIONS.steamer), do: 'confirm' },
+        { at: crateSpot('noodle'), do: 'confirm' },
+        { at: spot(STATIONS.wok), do: 'confirm' },
+      ], 40);
+      return s;
+    };
+    const busy = (s) => s.screen === 'play' && s.time >= 120.2 && s.rushBanner > 0.7
+      && s.wok && s.wok.item.stage !== 'burnt' && s.steamer && s.board && s.tickets.length >= 3;
+    let pick = null;
+    if (fresh) {
+      for (let pause = 0; pause <= 30 && !pick; pause += 0.25) {
+        const s = tryRush(pause);
+        if (busy(s)) pick = s;
+      }
     }
+    if (!pick) pick = tryRush(0);
+    if (pick !== state) Object.assign(state, pick);
     return;
   }
   if (shot === 'results') {

@@ -23,12 +23,12 @@ function drawTicket(ctx, ticket, x, y) {
   text(ctx, ticket.recipe.name, x + 10, y + 15, 15, '#241a12', 800);
   text(ctx, `$${ticket.recipe.price}`, x + w - 10, y + 15, 14, '#b07d2a', 800, 'right');
   ticket.recipe.needs.forEach((need, i) => {
-    const cx = x + 24 + i * 62;
+    const cx = x + 30 + i * 70;
     ctx.fillStyle = '#f0e6cf';
     ctx.beginPath();
-    ctx.arc(cx, y + 44, 15, 0, Math.PI * 2);
+    ctx.arc(cx, y + 44, 19, 0, Math.PI * 2);
     ctx.fill();
-    drawIngredient(ctx, need.ing, need.stage, cx, y + 44, 11);
+    drawIngredient(ctx, need.ing, need.stage, cx, y + 44, 15);
   });
   const barColor = frac > 0.5 ? '#7fb069' : frac > 0.25 ? '#f5a623' : '#e4572e';
   progressBar(ctx, x + 10, y + h - 10, w - 20, 6, frac, barColor);

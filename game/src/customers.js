@@ -59,14 +59,14 @@ function drawDiner(ctx, ticket, index, x, y) {
   const by = y - 36;
   ctx.fillStyle = 'rgba(255,243,214,0.95)';
   ctx.beginPath();
-  ctx.arc(bx, by, 19, 0, Math.PI * 2);
+  ctx.arc(bx, by, 23, 0, Math.PI * 2);
   ctx.fill();
   const first = ticket.recipe.needs[0];
-  drawIngredient(ctx, first.ing, first.stage, bx, by, 11);
+  drawIngredient(ctx, first.ing, first.stage, bx, by, 16);
   ctx.strokeStyle = moodColor(frac);
   ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.arc(bx, by, 21, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2);
+  ctx.arc(bx, by, 25, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2);
   ctx.stroke();
   if (frac <= 0.28) text(ctx, '!', bx + 20, by - 18, 18, '#e4572e', 800, 'center');
 }
