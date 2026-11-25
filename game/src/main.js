@@ -3,7 +3,7 @@
 // renderer paints what is there. The game moves between four screens:
 // title, play, paused and game over.
 //
-// ?seed=N fixes the ticket order. ?shot=start|cover|rush|serve (with
+// ?seed=N fixes the ticket order. ?shot=start|cover|rush|serve|kitchen (with
 // &seed=N) stages that scene instead of running the loop, paints it twice
 // and sets window.__shotReady for a screenshot.
 import { BEST_KEY, SLOWMO_SCALE, STEP } from './config.js';

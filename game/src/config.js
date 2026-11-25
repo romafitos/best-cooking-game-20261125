@@ -101,9 +101,14 @@ export const BURN_SECONDS = 9; // wokked food burns if left this long
 
 // Waves: the day escalates twice. Spawn interval and patience shrink.
 export const WAVES = [
-  { from: 0, spawn: 14, patience: 50, label: 'MORNING PREP' },
-  { from: 60, spawn: 9, patience: 42, label: 'LUNCH RUSH' },
-  { from: 120, spawn: 7, patience: 35, label: 'DINNER RUSH' },
+  // r2 balance: r1's 14/9/7 s spawns with 50/42/35 s patience let tickets
+  // pile up faster than one cook can walk three components to the pass
+  // (~35 s a dish), so a careful player still lost ~10 tickets a day and
+  // the combo never got going. tools/sim.mjs --pilot fast: walk-outs
+  // 9.9 -> 4.9 a day, best combo 1.1 -> 2.7.
+  { from: 0, spawn: 18, patience: 72, label: 'MORNING PREP' },
+  { from: 60, spawn: 13, patience: 60, label: 'LUNCH RUSH' },
+  { from: 120, spawn: 10, patience: 50, label: 'DINNER RUSH' },
 ];
 export const MAX_OPEN_TICKETS = 4;
 export const PLATE_SLOTS = 3; // plates drawn on the pass

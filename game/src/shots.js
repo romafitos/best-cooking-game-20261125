@@ -2,9 +2,9 @@
 // world for a fixed number of steps, steered by a scripted pilot that walks
 // the chef between stations and presses E — so the frame is what a short
 // game really looks like, and the same seed always gives the same frame.
-// ?shot=start|cover|rush|serve (with &seed=N) stages that scene instead of
+// ?shot=start|cover|rush|serve|kitchen (with &seed=N) stages that scene instead of
 // running the loop, paints it twice and sets window.__shotReady.
-import { INGREDIENTS, STEP, STATIONS, RECIPES } from './config.js';
+import { INGREDIENTS, STEP, STATIONS, RECIPES, STEAM_SECONDS } from './config.js';
 import { stepWorld } from './world.js';
 
 const SAMPLE = STEP;
@@ -42,6 +42,15 @@ function runPilot(state, goals, seconds) {
       if (waitLeft <= 0) { goalIndex += 1; waitLeft = -1; }
     } else if (d > 16) {
       input.move = { x: dx / d, y: dy / d };
+    } else if (goal.do === 'collect') {
+      // Stand at the wok/steamer until its item is done, then lift it.
+      const pot = state[goal.slot];
+      const limit = goal.slot === 'wok' ? state.wokSeconds : STEAM_SECONDS;
+      if (pot && pot.t >= limit && confirmCooldown <= 0) {
+        input.pressed.add('confirm');
+        confirmCooldown = 0.35;
+        goalIndex += 1;
+      }
     } else if (goal.do === 'confirm') {
       if (confirmCooldown <= 0) {
         input.pressed.add('confirm');
@@ -86,6 +95,49 @@ function cookDish(state, recipeId, seconds) {
   runPilot(state, goals, seconds);
 }
 
+// A practised cook: start whatever needs heat first, chop the cold
+// component while the wok or steamer works, then lift and plate. Same
+// rules and stations as cookDish, just no standing around.
+function fetchGoals(need) {
+  const goals = [{ at: crateSpot(need.ing), do: 'confirm' }];
+  if (INGREDIENTS[need.ing].chop && need.stage !== 'steamed') {
+    goals.push({ at: spot(STATIONS.board), do: 'confirm', needTaps: 1 });
+    goals.push({ at: spot(STATIONS.board), do: 'confirm', needTaps: 3 });
+    goals.push({ at: spot(STATIONS.board), do: 'confirm' });
+  }
+  return goals;
+}
+function slotFor(need) {
+  return need.stage === 'wokked' ? 'wok' : need.stage === 'steamed' ? 'steamer' : null;
+}
+function cookDishFast(state, recipeId, seconds) {
+  const recipe = RECIPES.find((r) => r.id === recipeId);
+  const hot = recipe.needs.filter((n) => slotFor(n));
+  const cold = recipe.needs.filter((n) => !slotFor(n));
+  const pass = { at: spot(STATIONS.pass), do: 'confirm' };
+  const goals = [];
+  const busy = {}; // slot -> true while something is cooking there
+  const start = (need) => {
+    const slot = slotFor(need);
+    goals.push(...fetchGoals(need), { at: spot(STATIONS[slot]), do: 'confirm' });
+    busy[slot] = true;
+  };
+  const collect = (slot) => {
+    goals.push({ at: spot(STATIONS[slot]), do: 'collect', slot }, pass);
+    busy[slot] = false;
+  };
+  // The steamer never burns, so it starts first and works through the
+  // whole dish; the wok burns, so the cook stays beside it.
+  const steamed = hot.filter((n) => slotFor(n) === 'steamer');
+  const wokked = hot.filter((n) => slotFor(n) === 'wok');
+  if (steamed.length) start(steamed.shift());
+  for (const need of cold) goals.push(...fetchGoals(need), pass);
+  for (const need of wokked) { start(need); collect('wok'); }
+  if (busy.steamer) collect('steamer');
+  for (const need of steamed) { start(need); collect('steamer'); }
+  runPilot(state, goals, seconds);
+}
+
 // The open ticket with the most patience left: the one the pilot can
 // still finish before it walks out.
 function longestWaitingTicket(state) {
@@ -103,6 +155,35 @@ function serveNextTicket(state) {
   runPilot(state, [{ at: spot(STATIONS.pass), do: 'confirm', needTaps: 2 }], 6);
 }
 
+// Practised cook's pick: the most urgent ticket that can still be made in
+// time (about 25 s of patience), else the freshest one.
+function urgentTicket(state) {
+  let best = null;
+  for (const ticket of state.tickets) {
+    if (ticket.patience < 25) continue;
+    if (!best || ticket.patience < best.patience) best = ticket;
+  }
+  return best || longestWaitingTicket(state);
+}
+export function serveFast(state) {
+  for (let i = 0; i < 20 && state.tickets.length === 0 && state.screen === 'play'; i += 1) {
+    runPilot(state, [{ at: { x: state.chef.x, y: state.chef.y }, do: 'wait', n: 1 }], 1);
+  }
+  const ticket = urgentTicket(state);
+  if (!ticket) return;
+  cookDishFast(state, ticket.recipe.id, 60);
+  runPilot(state, [{ at: spot(STATIONS.pass), do: 'confirm', needTaps: 2 }], 6);
+}
+
+// Serve dishes with the practised cook until the combo reaches `combo`
+// at or after `notBefore` seconds (or the day runs low).
+function streak(state, combo, notBefore) {
+  for (let i = 0; i < 12 && state.screen === 'play' && state.time < 150; i += 1) {
+    if (state.combo >= combo && state.time >= notBefore) return;
+    serveFast(state);
+  }
+}
+
 export function stageShot(state, shot) {
   state.screen = 'play';
   if (shot === 'start') {
@@ -110,13 +191,10 @@ export function stageShot(state, shot) {
     return;
   }
   if (shot === 'cover') {
-    // A busy mid-day frame: two dishes served (coins in, the third plate
-    // unlocked), one dish READY on the pass, one plate half built, the wok
-    // firing and a chicken mid-chop on the board.
-    serveNextTicket(state);
-    serveNextTicket(state);
-    const ready = longestWaitingTicket(state);
-    if (ready) cookDish(state, ready.recipe.id, 60);
+    // A busy mid-day frame on a live streak: dishes served back to back
+    // (combo running), then a dish half built on the pass, the wok firing
+    // and a chicken mid-chop on the board.
+    streak(state, 2, 0);
     const goals = [
       { at: crateSpot('pepper'), do: 'confirm' },
       { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
@@ -133,20 +211,29 @@ export function stageShot(state, shot) {
     return;
   }
   if (shot === 'rush') {
-    // Dinner rush with the stall upgraded: dishes served until the tray
-    // unlocks (its banner still up), the chef carrying two things at once.
-    serveNextTicket(state);
-    serveNextTicket(state);
-    serveNextTicket(state);
-    serveNextTicket(state);
+    // Rush hour on a streak: dishes served back to back into the rush,
+    // the chef heading out with two things at once once the tray is open.
+    streak(state, 2, 100);
     const goals = [
       { at: crateSpot('prawn'), do: 'confirm' },
       { at: crateSpot('egg'), do: 'confirm' },
       { at: { x: 560, y: 430 }, do: 'walk' },
     ];
     runPilot(state, goals, 8.5);
-    state.rushLabel = 'DINNER RUSH';
-    state.rushBanner = 2.4;
+    return;
+  }
+  if (shot === 'kitchen') {
+    // Both heats at once: prawns in the steamer, noodles in the wok, the
+    // chef between them — steam and flame in the same frame.
+    streak(state, 2, 0);
+    const goals = [
+      { at: crateSpot('prawn'), do: 'confirm' },
+      { at: spot(STATIONS.steamer), do: 'confirm' },
+      { at: crateSpot('noodle'), do: 'confirm' },
+      { at: spot(STATIONS.wok), do: 'confirm' },
+      { at: spot(STATIONS.wok), do: 'wait', n: 1.6 },
+    ];
+    runPilot(state, goals, 30);
     return;
   }
   if (shot === 'serve') {

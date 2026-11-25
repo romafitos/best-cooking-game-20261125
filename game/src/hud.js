@@ -104,7 +104,7 @@ export function drawHud(ctx, state) {
     ctx.fill();
     text(ctx, `COMBO ×${state.combo}`, rx + 188, 48, 17, '#fff', 800, 'center');
   } else {
-    text(ctx, 'COMBO ×0', rx + 188, 48, 14, 'rgba(255,243,214,0.55)', 700, 'center');
+    text(ctx, `COMBO ×${state.combo}`, rx + 188, 48, 14, 'rgba(255,243,214,0.55)', 700, 'center');
   }
   drawDayClock(ctx, state, rx + 316, 49);
   if (state.rushBanner > 0) drawBanner(ctx, state.rushLabel, '', 100, '#e4572e', state.rushBanner);

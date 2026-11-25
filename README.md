@@ -38,6 +38,11 @@ game in (`MAKEFUN_OUTPUT_DIR=out node main.ts`).
   the third plate and the tray before the lunch rush. In the headless
   benchmark (`node tools/sim.mjs --bench`) the tray and hot wok cut the time
   to cook a dish from 33.1 s to 27.5 s on average.
+- Pacing was retuned after measuring it: tickets now arrive every 18 / 13 /
+  10 s (morning / lunch / dinner) and wait 72 / 60 / 50 s. With r1's tighter
+  clock a careful cook lost about 10 tickets a day and never held a combo;
+  now the practised-cook pilot in `game/src/shots.js` loses about 5 and
+  keeps streaks of ×2–×3 going into the rush.
 - A plate needs exactly the 3 components of a recipe. Serve the right dish
   to the right ticket for coins + combo; a ticket that runs out walks away
   and resets your combo. Day ends after 3 minutes — best day wins.
