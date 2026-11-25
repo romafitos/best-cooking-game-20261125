@@ -278,7 +278,7 @@ function interact(state, zone) {
           state.events.push(EVENT_PLACE);
           const recipe = plateRecipe(plate);
           if (recipe) {
-            popup(state, zone.x + zone.w / 2, zone.y - 12, `${recipe.name} READY!`, '#7fb069');
+            popup(state, zone.x + zone.w / 2, zone.y - 40, `${recipe.name} READY!`, '#7fb069');
             state.events.push(EVENT_DING);
           }
           return;
@@ -376,7 +376,7 @@ export function stepWorld(state, input) {
     if (state.wok.t >= WOK_SECONDS && state.wok.item.stage === 'chopped') state.wok.item.stage = 'wokked';
     if (state.wok.t >= BURN_SECONDS && state.wok.item.stage !== 'burnt') {
       state.wok.item.stage = 'burnt';
-      popup(state, STATIONS.wok.x + 84, STATIONS.wok.y - 10, 'BURNT!', '#e4572e');
+      popup(state, STATIONS.wok.x + 84, STATIONS.wok.y - 40, 'BURNT!', '#e4572e');
       state.events.push(EVENT_BURN);
     }
   }
