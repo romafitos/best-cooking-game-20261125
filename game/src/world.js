@@ -246,7 +246,7 @@ function interact(state, zone) {
         state.combo += 1;
         state.bestCombo = Math.max(state.bestCombo, state.combo);
         state.served += 1;
-        popup(state, zone.x + zone.w / 2, zone.y - 12, `+${earned}  ${ticket.recipe.name}`, '#ffd166');
+        popup(state, chef.x, chef.y - 64, `+${earned}  ${ticket.recipe.name}`, '#ffd166');
         burst(state, zone.x + zone.w / 2, zone.y + 40, '#ffd166', 14, 160);
         state.events.push(EVENT_SERVE);
         chef.hand = null;

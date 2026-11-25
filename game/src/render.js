@@ -286,7 +286,7 @@ function drawStations(ctx, state) {
   } else {
     text(ctx, 'CHOP ×3', b.x + b.w / 2, b.y + 61, 13, 'rgba(36,26,18,0.55)', 800, 'center');
   }
-  text(ctx, b.label, b.x + b.w / 2, b.y + b.h + 14, 11, PALETTE.cream, 800, 'center');
+  text(ctx, b.label, b.x + b.w / 2, b.y - 12, 11, PALETTE.cream, 800, 'center');
   // Wok.
   const w = STATIONS.wok;
   ctx.fillStyle = '#3a3a3a';
@@ -325,7 +325,7 @@ function drawStations(ctx, state) {
   } else {
     text(ctx, 'READY', w.x + w.w / 2, w.y + 58, 12, 'rgba(255,243,214,0.6)', 800, 'center');
   }
-  text(ctx, w.label, w.x + w.w / 2, w.y + w.h + 14, 11, PALETTE.cream, 800, 'center');
+  text(ctx, w.label, w.x + w.w / 2, w.y - 12, 11, PALETTE.cream, 800, 'center');
   // Steamer.
   const s = STATIONS.steamer;
   ctx.fillStyle = '#b8c4c9';
@@ -346,7 +346,7 @@ function drawStations(ctx, state) {
     drawIngredient(ctx, state.steamer.item.ing, state.steamer.item.stage, s.x + s.w / 2, s.y + 48, 18);
     progressBar(ctx, s.x + 16, s.y + s.h - 22, s.w - 32, 8, Math.min(1, state.steamer.t / STEAM_SECONDS), '#7fb069');
   }
-  text(ctx, s.label, s.x + s.w / 2, s.y + s.h + 14, 11, PALETTE.cream, 800, 'center');
+  text(ctx, s.label, s.x + s.w / 2, s.y - 12, 11, PALETTE.cream, 800, 'center');
   // Pass: plating + serve.
   const p = STATIONS.pass;
   ctx.fillStyle = PALETTE.counter;
@@ -366,7 +366,7 @@ function drawStations(ctx, state) {
   rr(ctx, p.x + p.w - 92, p.y + 12, 80, 28, 6);
   ctx.fill();
   text(ctx, 'SERVE →', p.x + p.w - 52, p.y + 27, 13, '#fff', 800, 'center');
-  text(ctx, p.label, p.x + p.w / 2, p.y + p.h + 14, 11, PALETTE.cream, 800, 'center');
+  text(ctx, p.label, p.x + p.w / 2, p.y - 12, 11, PALETTE.cream, 800, 'center');
   // Trash.
   const t = STATIONS.trash;
   ctx.fillStyle = '#4a4a4a';
