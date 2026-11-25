@@ -2,7 +2,7 @@
 // world for a fixed number of steps, steered by a scripted pilot that walks
 // the chef between stations and presses E — so the frame is what a short
 // game really looks like, and the same seed always gives the same frame.
-// ?shot=start|cover|rush|serve|kitchen (with &seed=N) stages that scene instead of
+// ?shot=start|cover|rush|serve|kitchen|results (with &seed=N) stages that scene instead of
 // running the loop, paints it twice and sets window.__shotReady.
 import { INGREDIENTS, STEP, STATIONS, RECIPES, STEAM_SECONDS } from './config.js';
 import { stepWorld } from './world.js';
@@ -193,7 +193,7 @@ export function stageShot(state, shot) {
   if (shot === 'cover') {
     // A busy mid-day frame on a live streak: dishes served back to back
     // (combo running), one dish READY on the pass and the next one
-    // started: chopped greens on the next plate.
+    // started: chopped greens on the next plate, noodles hitting the wok.
     streak(state, 2, 0);
     const ready = urgentTicket(state);
     if (ready) cookDishFast(state, ready.recipe.id, 60);
@@ -203,6 +203,9 @@ export function stageShot(state, shot) {
       { at: spot(STATIONS.board), do: 'confirm', needTaps: 3 },
       { at: spot(STATIONS.board), do: 'confirm' },
       { at: spot(STATIONS.pass), do: 'confirm' },
+      { at: crateSpot('noodle'), do: 'confirm' },
+      { at: spot(STATIONS.wok), do: 'confirm' },
+      { at: spot(STATIONS.wok), do: 'wait', n: 0.8 },
     ];
     runPilot(state, goals, 30);
     return;
@@ -217,6 +220,20 @@ export function stageShot(state, shot) {
       { at: { x: 560, y: 430 }, do: 'walk' },
     ];
     runPilot(state, goals, 8.5);
+    // Hold on until the dinner rush rolls in, so its banner is up.
+    if (state.time < 120.4) {
+      const n = 120.4 - state.time;
+      runPilot(state, [{ at: { x: state.chef.x, y: state.chef.y }, do: 'wait', n }], n + STEP);
+    }
+    return;
+  }
+  if (shot === 'results') {
+    // The end of a whole day played by the practised cook: the results
+    // card with dishes served, walk-outs, best combo and the grade.
+    for (let i = 0; i < 20 && state.screen === 'play'; i += 1) serveFast(state);
+    for (let i = 0; i < 400 && state.screen === 'play'; i += 1) {
+      runPilot(state, [{ at: { x: state.chef.x, y: state.chef.y }, do: 'wait', n: 1 }], 1);
+    }
     return;
   }
   if (shot === 'kitchen') {

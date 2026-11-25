@@ -104,11 +104,12 @@ export const WAVES = [
   // r2 balance: r1's 14/9/7 s spawns with 50/42/35 s patience let tickets
   // pile up faster than one cook can walk three components to the pass
   // (~35 s a dish), so a careful player still lost ~10 tickets a day and
-  // the combo never got going. tools/sim.mjs --pilot fast: walk-outs
-  // 9.9 -> 4.9 a day, best combo 1.1 -> 2.7.
-  { from: 0, spawn: 18, patience: 72, label: 'MORNING PREP' },
-  { from: 60, spawn: 13, patience: 60, label: 'LUNCH RUSH' },
-  { from: 120, spawn: 10, patience: 50, label: 'DINNER RUSH' },
+  // the combo never got going. Now (40 simulated days, the greedy cook in
+  // tools/sim.mjs): served 2.6 -> 3.7 a day, walk-outs ~10 -> 3.5; the
+  // practised cook in shots.js loses ~3 a day and holds combos of x3.
+  { from: 0, spawn: 18, patience: 80, label: 'MORNING PREP' },
+  { from: 60, spawn: 13, patience: 66, label: 'LUNCH RUSH' },
+  { from: 120, spawn: 10, patience: 55, label: 'DINNER RUSH' },
 ];
 export const MAX_OPEN_TICKETS = 4;
 export const PLATE_SLOTS = 3; // plates drawn on the pass

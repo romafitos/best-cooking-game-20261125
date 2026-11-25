@@ -8,6 +8,7 @@ import { shakeOffset } from './effects.js';
 import { roundRect, text, progressBar } from './canvas-kit.js';
 import { drawIngredient, drawLockedPlate, drawPlate } from './food-art.js';
 import { drawHud, drawOver, drawPaused, drawTitle } from './hud.js';
+import { drawCustomers } from './customers.js';
 import { SCREEN_OVER, SCREEN_PAUSED, SCREEN_TITLE } from './events.js';
 
 const TILE = 56;
@@ -385,6 +386,7 @@ export function createRenderer(canvas) {
       ctx.save();
       ctx.translate(shake.x, shake.y);
       drawBackdrop(ctx, floorLayer);
+      drawCustomers(ctx, state);
       drawCrates(ctx);
       drawBoard(ctx, state);
       drawWok(ctx, state);

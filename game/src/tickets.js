@@ -68,6 +68,9 @@ export function payForDish(state, dishId) {
   return { earned, name: ticket.recipe.name };
 }
 
+// Grades fit a 3-minute day where a dish is about 35 s of walking and
+// cooking: the practised cook serves 4-5, a sharp player with the tray and
+// hot wok 7-9.
 export function gradeFor(served) {
-  return served >= 14 ? 'S' : served >= 10 ? 'A' : served >= 7 ? 'B' : served >= 4 ? 'C' : 'D';
+  return served >= 9 ? 'S' : served >= 7 ? 'A' : served >= 5 ? 'B' : served >= 3 ? 'C' : 'D';
 }
