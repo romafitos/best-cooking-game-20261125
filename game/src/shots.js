@@ -192,20 +192,17 @@ export function stageShot(state, shot) {
   }
   if (shot === 'cover') {
     // A busy mid-day frame on a live streak: dishes served back to back
-    // (combo running), then a dish half built on the pass, the wok firing
-    // and a chicken mid-chop on the board.
+    // (combo running), one dish READY on the pass and the next one
+    // started: chopped greens on the next plate.
     streak(state, 2, 0);
+    const ready = urgentTicket(state);
+    if (ready) cookDishFast(state, ready.recipe.id, 60);
     const goals = [
-      { at: crateSpot('pepper'), do: 'confirm' },
+      { at: crateSpot('greens'), do: 'confirm' },
       { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
       { at: spot(STATIONS.board), do: 'confirm', needTaps: 3 },
       { at: spot(STATIONS.board), do: 'confirm' },
       { at: spot(STATIONS.pass), do: 'confirm' },
-      { at: crateSpot('noodle'), do: 'confirm' },
-      { at: spot(STATIONS.wok), do: 'confirm' },
-      { at: crateSpot('chicken'), do: 'confirm' },
-      { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
-      { at: spot(STATIONS.board), do: 'confirm', needTaps: 2 },
     ];
     runPilot(state, goals, 30);
     return;
