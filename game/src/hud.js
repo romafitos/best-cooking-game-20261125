@@ -134,12 +134,34 @@ export function drawPaused(ctx) {
 }
 
 export function drawOver(ctx, state) {
-  ctx.fillStyle = 'rgba(15,38,34,0.85)';
+  // The end-of-day card: a big grade stamp and the day's numbers, sized to
+  // read even as a thumbnail.
+  ctx.fillStyle = 'rgba(15,38,34,0.72)';
   ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
-  text(ctx, 'DAY DONE!', 640, 180, 64, '#ffd166', 800, 'center');
-  text(ctx, `Grade ${state.grade}`, 640, 250, 30, '#fff3d6', 800, 'center');
-  text(ctx, `Coins earned: $${state.coins}`, 640, 310, 24, '#fff', 700, 'center');
-  text(ctx, `Dishes served: ${state.served}   ·   Walked out: ${state.missed}   ·   Best combo: ×${state.bestCombo}`, 640, 350, 20, '#fff3d6', 600, 'center');
-  text(ctx, `Upgrades earned: ${state.unlocked.length} of 3`, 640, 386, 18, '#7fb069', 700, 'center');
-  if (Math.floor(Date.now() / 500) % 2 === 0) text(ctx, 'PRESS ENTER TO COOK ANOTHER DAY', 640, 440, 22, '#fff', 800, 'center');
+  ctx.fillStyle = '#fff3d6';
+  roundRect(ctx, 290, 110, 700, 470, 28);
+  ctx.fill();
+  ctx.strokeStyle = '#ffd166';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+  text(ctx, 'DAY DONE!', 640, 175, 58, '#e4572e', 800, 'center');
+  const gradeColor = { S: '#e4572e', A: '#2a9d8f', B: '#f4a261', C: '#8a6d1d', D: '#7a6a55' }[state.grade] || '#7a6a55';
+  ctx.fillStyle = gradeColor;
+  ctx.beginPath();
+  ctx.arc(420, 330, 82, 0, Math.PI * 2);
+  ctx.fill();
+  text(ctx, state.grade || '-', 420, 334, 96, '#fff', 800, 'center');
+  text(ctx, 'GRADE', 420, 440, 18, '#5a4a35', 800, 'center');
+  const rows = [
+    [`$${state.coins}`, 'coins earned'],
+    [`${state.served}`, 'dishes served'],
+    [`${state.missed}`, 'walked out'],
+    [`×${state.bestCombo}`, 'best combo'],
+    [`${state.unlocked.length} / 3`, 'upgrades'],
+  ];
+  rows.forEach(([value, label], i) => {
+    text(ctx, value, 640, 252 + i * 58, 34, '#2b1d14', 800);
+    text(ctx, label, 780, 252 + i * 58, 20, '#5a4a35', 700);
+  });
+  text(ctx, 'PRESS ENTER TO COOK ANOTHER DAY', 640, 548, 20, '#1d4038', 800, 'center');
 }

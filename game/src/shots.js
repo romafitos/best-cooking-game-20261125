@@ -193,7 +193,8 @@ export function stageShot(state, shot) {
   if (shot === 'cover') {
     // A busy mid-day frame on a live streak: dishes served back to back
     // (combo running), one dish READY on the pass and the next one
-    // started: chopped greens on the next plate, noodles hitting the wok.
+    // started: chopped greens on the next plate, noodles hitting the wok
+    // and a pepper under the knife.
     streak(state, 2, 0);
     const ready = urgentTicket(state);
     if (ready) cookDishFast(state, ready.recipe.id, 60);
@@ -205,7 +206,9 @@ export function stageShot(state, shot) {
       { at: spot(STATIONS.pass), do: 'confirm' },
       { at: crateSpot('noodle'), do: 'confirm' },
       { at: spot(STATIONS.wok), do: 'confirm' },
-      { at: spot(STATIONS.wok), do: 'wait', n: 0.8 },
+      { at: crateSpot('pepper'), do: 'confirm' },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 2 },
     ];
     runPilot(state, goals, 30);
     return;
@@ -237,15 +240,17 @@ export function stageShot(state, shot) {
     return;
   }
   if (shot === 'kitchen') {
-    // Both heats at once: prawns in the steamer, noodles in the wok, the
-    // chef between them — steam and flame in the same frame.
+    // Every station busy: prawns in the steamer, noodles in the wok and
+    // the chef mid-chop on a pepper — steam, flame and knife in one frame.
     streak(state, 2, 0);
     const goals = [
       { at: crateSpot('prawn'), do: 'confirm' },
       { at: spot(STATIONS.steamer), do: 'confirm' },
       { at: crateSpot('noodle'), do: 'confirm' },
       { at: spot(STATIONS.wok), do: 'confirm' },
-      { at: spot(STATIONS.wok), do: 'wait', n: 1.6 },
+      { at: crateSpot('pepper'), do: 'confirm' },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 1 },
+      { at: spot(STATIONS.board), do: 'confirm', needTaps: 2 },
     ];
     runPilot(state, goals, 30);
     return;

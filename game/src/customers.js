@@ -20,6 +20,11 @@ function drawCounter(ctx) {
   ctx.fillStyle = '#8a5530';
   roundRect(ctx, 300, 660, 680, 10, 6);
   ctx.fill();
+  // The stall's name board, hung on the counter front.
+  ctx.fillStyle = '#e4572e';
+  roundRect(ctx, 548, 668, 184, 24, 6);
+  ctx.fill();
+  text(ctx, 'WOK & EMBER', 640, 681, 15, '#fff3d6', 800, 'center');
 }
 
 function drawDiner(ctx, ticket, index, x, y) {
